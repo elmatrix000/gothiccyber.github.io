@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GOTHALIENBOY: Kagiso Cyberheist - GTA Edition</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/PointerLockControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/libs/stats.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="screen active">
+        <div class="loading-container">
+            <div class="loading-logo">
+                <div class="logo-main">GOTHALIENBOY</div>
+                <div class="logo-sub">KAGISO CYBERHEIST</div>
+            </div>
+            
+            <div class="loading-progress">
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">INITIALIZING NEURAL INTERFACE...</div>
+                </div>
+                
+                <div class="loading-tips">
+                    <div class="tip" id="tip1">
+                        <i class="fas fa-gamepad"></i>
+                        <span>WASD to move, Mouse to look, SPACE to jump</span>
+                    </div>
+                    <div class="tip" id="tip2">
+                        <i class="fas fa-car"></i>
+                        <span>Press F to enter vehicles, G to toggle weapons</span>
+                    </div>
+                    <div class="tip" id="tip3">
+                        <i class="fas fa-terminal"></i>
+                        <span>Press H to hack devices, TAB for mission menu</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="loading-story">
+                <div class="story-panel">
+                    <h3><i class="fas fa-book"></i> THE STORY</h3>
+                    <p>"They said a township kid couldn't crack Nexus Dynamics. Tonight, I'm taking ₿4.8 million and vanishing from Kagiso forever."</p>
+                    <p class="location"><i class="fas fa-map-marker-alt"></i> Kagiso, Krugersdorp → The World</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Menu -->
+    <div id="mainMenu" class="screen">
+        <div class="menu-container">
+            <canvas id="menuBackground"></canvas>
+            
+            <div class="menu-content">
+                <div class="menu-header">
+                    <h1>GOTHALIENBOY</h1>
+                    <h2>KAGISO CYBERHEIST</h2>
+                    <p class="menu-tagline">From township zero to cyber hero</p>
+                </div>
+                
+                <div class="menu-options">
+                    <button class="menu-btn" id="newGame">
+                        <div class="btn-content">
+                            <i class="fas fa-play-circle"></i>
+                            <span>START NEW HEIST</span>
+                            <small>Begin your escape from Kagiso</small>
+                        </div>
+                    </button>
+                    
+                    <button class="menu-btn" id="loadGame">
+                        <div class="btn-content">
+                            <i class="fas fa-folder-open"></i>
+                            <span>CONTINUE HEIST</span>
+                            <small>Load saved game</small>
+                        </div>
+                    </button>
+                    
+                    <button class="menu-btn" id="multiplayer">
+                        <div class="btn-content">
+                            <i class="fas fa-users"></i>
+                            <span>ONLINE HEIST</span>
+                            <small>Co-op with friends</small>
+                        </div>
+                    </button>
+                    
+                    <button class="menu-btn" id="settings">
+                        <div class="btn-content">
+                            <i class="fas fa-cogs"></i>
+                            <span>SETTINGS</span>
+                            <small>Graphics, controls, audio</small>
+                        </div>
+                    </button>
+                    
+                    <button class="menu-btn" id="credits">
+                        <div class="btn-content">
+                            <i class="fas fa-info-circle"></i>
+                            <span>STORY & CREDITS</span>
+                            <small>Meet the characters</small>
+                        </div>
+                    </button>
+                    
+                    <button class="menu-btn" id="quit">
+                        <div class="btn-content">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>EXIT GAME</span>
+                            <small>Return to desktop</small>
+                        </div>
+                    </button>
+                </div>
+                
+                <div class:="menu-footer">
+                    <div class="stats">
+                        <div class="stat">
+                            <span class="stat-label">TOTAL PLAYERS</span>
+                            <span class="stat-value" id="totalPlayers">1,847</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">BITCOIN STOLEN</span>
+                            <span class="stat-value">₿128M</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">SUCCESS RATE</span>
+                            <span class="stat-value">12%</span>
+                        </div>
+                    </div>
+                    <div class="version">v3.0.1 | KAGISO EDITION</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Game Screen -->
+    <div id="gameScreen" class="screen">
+        <canvas id="gameCanvas"></canvas>
+        
+        <!-- In-Game UI -->
+        <div class="game-ui">
+            <!-- Minimap -->
+            <div class="minimap" id="minimap">
+                <div class="minimap-header">
+                    <span>KAGISO TOWNSHIP</span>
+                    <button class="minimap-toggle" id="mapToggle">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
+                <div class="minimap-content">
+                    <canvas id="minimapCanvas"></canvas>
+                </div>
+            </div>
+            
+            <!-- Health & Stats -->
+            <div class="stats-panel">
+                <div class="health-bar">
+                    <div class="health-fill" id="healthFill"></div>
+                    <span class="health-text">HEALTH: <span id="healthValue">100</span>%</span>
+                </div>
+                
+                <div class="armor-bar">
+                    <div class="armor-fill" id="armorFill"></div>
+                    <span class="armor-text">ARMOR: <span id="armorValue">0</span>%</span>
+                </div>
+                
+                <div class="money-display">
+                    <i class="fab fa-bitcoin"></i>
+                    <span id="moneyValue">₿0</span>
+                </div>
+            </div>
+            
+            <!-- Wanted Level -->
+            <div class="wanted-level" id="wantedLevel">
+                <div class="wanted-stars">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="wanted-text">NEXUS SECURITY</div>
+            </div>
+            
+            <!-- Weapon HUD -->
+            <div class="weapon-hud">
+                <div class="weapon-info">
+                    <span class="weapon-name" id="weaponName">CYBER PISTOL</span>
+                    <span class="ammo-count" id="ammoCount">30/120</span>
+                </div>
+                <div class="weapon-wheel">
+                    <button class="wheel-btn" data-weapon="0">1</button>
+                    <button class="wheel-btn" data-weapon="1">2</button>
+                    <button class="wheel-btn" data-weapon="2">3</button>
+                    <button class="wheel-btn" data-weapon="3">4</button>
+                </div>
+            </div>
+            
+            <!-- Mission Display -->
+            <div class="mission-display" id="missionDisplay">
+                <div class="mission-header">
+                    <span class="mission-type">MAIN MISSION</span>
+                    <span class="mission-timer" id="missionTimer">--:--</span>
+                </div>
+                <div class="mission-objective" id="missionObjective">
+                    Meet Oracle at the chop shop
+                </div>
+                <div class="mission-hint" id="missionHint">
+                    Get to the yellow marker on your map
+                </div>
+            </div>
+            
+            <!-- Ability Wheel -->
+            <div class="ability-wheel" id="abilityWheel">
+                <div class="ability" data-ability="hack">
+                    <i class="fas fa-terminal"></i>
+                    <span>HACK</span>
+                </div>
+                <div class="ability" data-ability="cloak">
+                    <i class="fas fa-user-ninja"></i>
+                    <span>CLOAK</span>
+                </div>
+                <div class="ability" data-ability="overload">
+                    <i class="fas fa-bolt"></i>
+                    <span>OVERLOAD</span>
+                </div>
+                <div class="ability" data-ability="scan">
+                    <i class="fas fa-search"></i>
+                    <span>SCAN</span>
+                </div>
+            </div>
+            
+            <!-- Notifications -->
+            <div class="notification-center" id="notificationCenter"></div>
+            
+            <!-- Quick Menu -->
+            <div class="quick-menu">
+                <button class="quick-btn" id="phoneBtn">
+                    <i class="fas fa-mobile-alt"></i>
+                </button>
+                <button class="quick-btn" id="inventoryBtn">
+                    <i class="fas fa-backpack"></i>
+                </button>
+                <button class="quick-btn" id="mapBtn">
+                    <i class="fas fa-map"></i>
+                </button>
+                <button class="quick-btn" id="pauseBtn">
+                    <i class="fas fa-pause"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Controls (Hidden by default) -->
+        <div class="mobile-controls" id="mobileControls">
+            <div class="joystick" id="moveJoystick">
+                <div class="joystick-base"></div>
+                <div class="joystick-handle"></div>
+            </div>
+            <div class="action-buttons">
+                <button class="action-btn shoot-btn"><i class="fas fa-crosshairs"></i></button>
+                <button class="action-btn jump-btn"><i class="fas fa-arrow-up"></i></button>
+                <button class="action-btn enter-btn"><i class="fas fa-car"></i></button>
+                <button class="action-btn hack-btn"><i class="fas fa-terminal"></i></button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pause Menu -->
+    <div id="pauseMenu" class="screen">
+        <div class="pause-container">
+            <h2><i class="fas fa-pause"></i> HEIST PAUSED</h2>
+            
+            <div class="pause-options">
+                <button class="pause-btn" id="resumeBtn">
+                    <i class="fas fa-play"></i> RESUME HEIST
+                </button>
+                <button class="pause-btn" id="saveBtn">
+                    <i class="fas fa-save"></i> SAVE GAME
+                </button>
+                <button class="pause-btn" id="loadBtn">
+                    <i class="fas fa-folder-open"></i> LOAD GAME
+                </button>
+                <button class="pause-btn" id="settingsBtn">
+                    <i class="fas fa-cog"></i> SETTINGS
+                </button>
+                <button class="pause-btn" id="quitToMenuBtn">
+                    <i class="fas fa-home"></i> MAIN MENU
+                </button>
+                <button class="pause-btn" id="quitGameBtn">
+                    <i class="fas fa-power-off"></i> QUIT GAME
+                </button>
+            </div>
+            
+            <div class="pause-stats">
+                <div class="pause-stat">
+                    <span>TIME PLAYED</span>
+                    <strong id="playTime">00:00</strong>
+                </div>
+                <div class="pause-stat">
+                    <span>MISSION PROGRESS</span>
+                    <strong id="missionProgress">0%</strong>
+                </div>
+                <div class="pause-stat">
+                    <span>TOTAL EARNED</span>
+                    <strong id="totalEarned">₿0</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Phone Menu -->
+    <div id="phoneMenu" class="screen">
+        <div class="phone-container">
+            <div class="phone-header">
+                <div class="phone-time" id="phoneTime">12:00 AM</div>
+                <div class="phone-battery">84%</div>
+            </div>
+            
+            <div class="phone-apps">
+                <div class="app" data-app="contacts">
+                    <i class="fas fa-address-book"></i>
+                    <span>Contacts</span>
+                </div>
+                <div class="app" data-app="missions">
+                    <i class="fas fa-tasks"></i>
+                    <span>Missions</span>
+                </div>
+                <div class="app" data-app="map">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>Map</span>
+                </div>
+                <div class="app" data-app="internet">
+                    <i class="fas fa-globe"></i>
+                    <span>Internet</span>
+                </div>
+                <div class="app" data-app="stats">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Stats</span>
+                </div>
+                <div class="app" data-app="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </div>
+            </div>
+            
+            <div class="phone-content" id="phoneContent">
+                <!-- Dynamic content loads here -->
+            </div>
+            
+            <button class="phone-close" id="phoneClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Map Screen -->
+    <div id="mapScreen" class="screen">
+        <div class="map-container">
+            <div class="map-header">
+                <h3><i class="fas fa-map"></i> KAGISO CITY MAP</h3>
+                <div class="map-legend">
+                    <div class="legend-item"><span class="marker main"></span> Main Mission</div>
+                    <div class="legend-item"><span class="marker side"></span> Side Mission</div>
+                    <div class="legend-item"><span class="marker safehouse"></span> Safehouse</div>
+                </div>
+            </div>
+            <div class="map-content">
+                <canvas id="mapCanvas"></canvas>
+            </div>
+            <button class="map-close" id="mapClose">
+                <i class="fas fa-times"></i> CLOSE MAP
+            </button>
+        </div>
+    </div>
+    
+    <!-- Settings Menu -->
+    <div id="settingsMenu" class="screen">
+        <div class="settings-container">
+            <h2><i class="fas fa-cog"></i> SETTINGS</h2>
+            
+            <div class="settings-tabs">
+                <button class="tab-btn active" data-tab="graphics">GRAPHICS</button>
+                <button class="tab-btn" data-tab="audio">AUDIO</button>
+                <button class="tab-btn" data-tab="controls">CONTROLS</button>
+                <button class="tab-btn" data-tab="gameplay">GAMEPLAY</button>
+            </div>
+            
+            <div class="settings-content">
+                <div class="tab-content active" id="graphicsTab">
+                    <!-- Graphics settings -->
+                </div>
+                <div class="tab-content" id="audioTab">
+                    <!-- Audio settings -->
+                </div>
+                <div class="tab-content" id="controlsTab">
+                    <!-- Controls settings -->
+                </div>
+                <div class="tab-content" id="gameplayTab">
+                    <!-- Gameplay settings -->
+                </div>
+            </div>
+            
+            <div class="settings-footer">
+                <button class="settings-btn" id="settingsBack">BACK</button>
+                <button class="settings-btn" id="settingsApply">APPLY</button>
+                <button class="settings-btn" id="settingsDefault">DEFAULT</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Mission Complete Screen -->
+    <div id="missionComplete" class="screen">
+        <div class="mission-complete-container">
+            <div class="mission-header">
+                <h1 class="mission-title">MISSION COMPLETE</h1>
+                <h2 class="mission-name" id="completedMissionName">THE ORACLE'S CALL</h2>
+            </div>
+            
+            <div class="mission-stats">
+                <div class="mission-stat">
+                    <span>MISSION TIME</span>
+                    <strong id="missionTime">02:34</strong>
+                </div>
+                <div class="mission-stat">
+                    <span>ENEMIES KILLED</span>
+                    <strong id="enemiesKilled">12</strong>
+                </div>
+                <div class="mission-stat">
+                    <span>ACCURACY</span>
+                    <strong id="accuracy">78%</strong>
+                </div>
+                <div class="mission-stat">
+                    <span>REWARD</span>
+                    <strong id="missionReward">₿5,000</strong>
+                </div>
+            </div>
+            
+            <div class="mission-rating">
+                <div class="rating-stars">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="rating-text" id="ratingText">PROFESSIONAL</div>
+            </div>
+            
+            <button class="mission-continue" id="missionContinue">
+                CONTINUE HEIST
+            </button>
+        </div>
+    </div>
+    
+    <!-- Game Over Screen -->
+    <div id="gameOverScreen" class="screen">
+        <div class="gameover-container">
+            <div class="gameover-header">
+                <h1 class="gameover-title">HEIST FAILED</h1>
+                <h2 class="gameover-subtitle" id="deathReason">NEXUS SECURITY TERMINATED YOU</h2>
+            </div>
+            
+            <div class="gameover-stats">
+                <div class="gameover-stat">
+                    <span>HEIST PROGRESS</span>
+                    <strong id="heistProgress">12%</strong>
+                </div>
+                <div class="gameover-stat">
+                    <span>TOTAL EARNED</span>
+                    <strong id="totalEarned">₿15,400</strong>
+                </div>
+                <div class="gameover-stat">
+                    <span>TIME SURVIVED</span>
+                    <strong id="timeSurvived">2h 15m</strong>
+                </div>
+            </div>
+            
+            <div class="gameover-options">
+                <button class="gameover-btn" id="retryCheckpoint">
+                    <i class="fas fa-redo"></i> RETRY CHECKPOINT
+                </button>
+                <button class="gameover-btn" id="retryMission">
+                    <i class="fas fa-undo"></i> RETRY MISSION
+                </button>
+                <button class="gameover-btn" id="loadGameOver">
+                    <i class="fas fa-folder-open"></i> LOAD GAME
+                </button>
+                <button class="gameover-btn" id="quitToMenuOver">
+                    <i class="fas fa-home"></i> MAIN MENU
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Audio Elements -->
+    <audio id="bgMusic" loop>
+        <source src="https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="shootSound">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-laser-weapon-shot-1671.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="explosionSound">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-explosion-with-debris-1993.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="vehicleSound">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-car-engine-start-1155.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="hackSound">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-computer-sci-fi-click-901.mp3" type="audio/mpeg">
+    </audio>
+    
+    <!-- Scripts -->
+    <script src="game.js"></script>
+    <script>
+        // Initialize when page loads
+        window.addEventListener('load', () => {
+            // Detect mobile
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (isMobile) {
+                document.getElementById('mobileControls').style.display = 'flex';
+            }
+            
+            // Start loading
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.remove('active');
+                document.getElementById('mainMenu').classList.add('active');
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
